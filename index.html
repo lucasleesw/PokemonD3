@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title> D3 project lab1 </title>
+  <!--  <script src="../d3.min.js"></script> Use D3 library from CDN -->
+     <script src="https://d3js.org/d3.v4.min.js"></script>
+<style>
+    body {
+       background-image: url("backgound.png");
+       background-color: #FFFFFF;
+       height:700px;
+       background-position: center;
+       background-repeat: no-repeat;
+       background-size: cover;
+       position: relative;}
+    .center{
+      text-align: center;
+    }
+
+
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: rgba(179,202,230,0.2);
+    }
+
+    li {
+        float: left;
+        border-right:2px solid rgb(255,255,255,0.2);
+    }
+    li a {
+        display: block;
+        color: rgba(0,0,60,0.6);
+        text-align: center;
+        font-family:Verdana,sans-serif;
+        font-weight: 500;
+        padding: 12px 14px;
+        text-decoration: none;
+    }
+
+    li a:hover:not(.active) {
+        background-color: rgba(179,202,230,0.4);
+    }
+
+    .active {
+        background-color: rgba(179,202,230,0.8);
+    }
+
+
+img.top {vertical-align:text-top;}
+img.bottom {vertical-align:text-bottom;}
+
+
+</style>
+</head>
+<body>
+<!--
+<h1> Hello   World ?!! </h1>
+<p> test !!            test   </p>
+<img src="/19.jpg" alt="background" >
+-->
+<div id = 'menu' style="height:30px ;">
+<P>
+  <ul id = 'Menu'>
+  <!--  <li><a onclick="" >Menu</a></li> -->
+    <li><a class="active">Menu</a></li>
+    <li><a onclick="clearSVG(),createBars('type',10,'Tpye')">Type</a></li>
+    <li><a onclick="clearSVG(),createBars(hp,11,'HP')">HP</a></li>
+    <li><a onclick="clearSVG(),createBars(gener,6,'Generation')">Generation</a></li>
+    <li><a onclick="clearSVG(),createBars(speed,11,'Speed')">Speed</a></li>
+    <li><a onclick="clearSVG(),createBars(attack,7,'Attack')">Attack</a></li>
+    <li><a onclick="clearSVG(),createBars(totalValue,10,'Total Value')">Total</a></li>
+    <li style="float:right"><a onclick="clearSVG()">Clear All</a></li>
+  </ul>
+<!--
+<li><a class="active" onclick="">Menu</a></li>
+<li><a onclick="clearSVG(),createBars('type',10,'Tpye')">Type</a></li>
+<li><a onclick="clearSVG(),createBars(hp,11,'HP')">HP</a></li>
+<li><a onclick="clearSVG(),createBars(gener,6,'Generation')">Generation</a></li>
+<li><a onclick="clearSVG(),createBars(speed,11,'Speed')">Speed</a></li>
+<li><a onclick="clearSVG(),createBars(attack,7,'Attack')">Attack</a></li>
+<li><a onclick="clearSVG(),createBars(totalValue,10,'Total Value')">Total</a></li>
+<li style="float:right"><a onclick="clearSVG()">Clear All</a></li>
+<button onclick="clearSVG()">Clear All</button>
+<button onclick="clearSVG(),createBars('type',10,'Tpye')">Type</button>
+<button onclick="clearSVG(),createBars(hp,11,'HP')">HP</button>
+<button onclick="clearSVG(),createBars(gener,6,'Generation')">Generation</button>
+<button onclick="clearSVG(),createBars(speed,11,'Speed')">Speed</button>
+<button onclick="clearSVG(),createBars(attack,7,'Attack')">Attack</button>
+<button onclick="clearSVG(),createBars(totalValue,10,'Total Value')">Total</button>
+-->
+</p><!--<div class='background'></div>-->
+<!--
+<script>
+function showMeun(){
+
+}
+function hideMeun(){
+
+}
+-->
+</script>
+</div>
+<div id = 'head' class="center" style="height: 100px;">
+<h1 style="margin-bottom:0;">
+<P><img src="/pokemon.png" height='100px'></P>
+</h1>
+</div>
+
+<script>
+
+
+var hp= new Array();  //creat empty data sequence
+var type = new Array();
+var totalValue = new Array();
+var speed = new Array();
+var attack = new Array();
+var gener = new Array();
+
+
+d3.csv('Pokemon.csv',function(error,csvdata){
+  if(error){
+    console.log(error);}
+  else {                   //console.log(csvdata)
+     for( var i=0; i<csvdata.length;i++){
+         type[i] = csvdata[i].Type1;
+         totalValue[i]  = csvdata[i].Total;
+         speed[i]  = csvdata[i].Speed;
+         hp[i]  = csvdata[i].HP;
+         attack[i] = csvdata[i].Attack;
+         gener[i] = csvdata[i].Generation;
+       }}})                   //read data from csv
+//console.log(type);
+  //var typeValues = d3.set(type).values(); //deal with string data
+
+
+  var width = 800;
+  var height = 500;
+  var margin = ({top: 20, bottom:30,right:0,left:30});
+
+
+  var svg = d3.select('body')  //initialize a SVG
+              .append('svg')
+          //    .on('click',onMouseClick)
+              .attr('width',width)
+              .attr('height',height);
+
+
+function createBars(dataName,barNums,valueName){
+
+
+    //console.log(dataName);
+    var dataResult = new Array();
+    var dataScale = new Array();
+    dataScale[0]=0;
+    if (dataName != 'type'){
+        for( var i=0;i<barNums;i++){  //get the data result with bar numbers
+            var barMax = (i+1)*d3.max(dataName)/barNums;
+            var barMin = i*d3.max(dataName)/barNums;
+            dataScale[i+1] = barMax;
+//            console.log(barMax,barMin);
+            dataResult[i]=dataName.filter(x => x>barMin&&x<=barMax).length;
+    }}
+    else{
+        //deal with string data
+        dataScale = d3.set(type).values();
+        for( var i = 0; i<dataScale.length;i++){
+          dataResult[i]=0;
+  //        console.log(dataScale[i])
+          for( var j = 0; j<type.length;j++){
+              if (type[j] == dataScale[i]){
+                  dataResult[i]++;
+                }}}
+            //  dataResult.push(0);
+            //  dataScale.push('');
+            }
+
+
+    var mouseXais = new Array();
+
+
+
+    console.log(dataResult);
+  //  console.log(dataScale);
+
+  /*  var svg = d3.select('body')  //create a SVG
+                .append('svg')
+                .attr('width',width)
+                .attr('height',height);*/
+
+    var xScale = d3.scaleBand()
+                   .domain(dataScale)
+                   .padding([margin.left/2])
+                   .range([0, width]);
+
+    var yScale = d3.scaleLinear()
+                   .domain([0, d3.max(dataResult)+ 50/1.5])
+                   .range([d3.max(dataResult)*1.5+ 50, 0]);
+
+/*var xAttributeArray = new Array();
+    function xAttribute(){
+      var xAttributeArray = new Array();
+      for (var i=0;i<dataResult.length;i++){
+        xAttributeArray[i]= i*xScale.step()+margin.left+margin.left/2;
+      }
+      return xAttributeArray;
+    }
+    console.log(xAttribute()[1]);
+*/
+
+
+
+    svg.selectAll('rect')
+       .data(dataResult)
+       .enter()
+       .append('rect')
+       .attr("class", "bar")
+       .on("mouseover", onMouseOver)
+       .on("mouseout", onMouseOut)
+       .on('click',onMouseClick)
+    //   .attr('x',xAttribute())
+       .attr('x',function(d,i){
+    //     console.log(i * xScale.step()+margin.left+margin.left/2)
+         return i * xScale.step()+margin.left+margin.left/2         ; // margin + padding(which is margin/2)
+       })
+       .attr('y',d=> height - d*1.5 - margin.top)
+       //.attr('width', (width-margin.left)/dataResult.length-30)
+       .attr('width',xScale.step()-margin.left)
+    /*   .transition()
+       .ease(d3.easeLinear)
+       .duration(200)
+       .delay(function (d, i) {
+           return i * 50;
+       }) */
+       .attr('height', d=>d*1.5)
+       .attr('fill','rgba(159,176,201,0.7)')
+       .transition()
+    //   .attr('fill','rgba(0,0,50,0.4)')
+       .attr('fill',(d,i)=>'rgba(159,176,'+ (230-i*10) +',0.7)')
+       .duration(50)
+       .delay(function (d, i) {
+           return i * 20;})
+           ;
+
+       svg.on('mousemove',function(){
+           mouseXais = d3.mouse(this)[0];
+           svg.selectAll('rect')
+              .transition()
+              .duration(1)
+              .attr('x',function(d,i){
+                return  (i*xScale.step()+margin.left*1.5)-10*Math.pow(8,-Math.abs(i*xScale.step()+margin.left*1.5-mouseXais)/width) })
+              .attr('width',function(d,i){
+                return  (xScale.step()-margin.left)+20*Math.pow(8,-Math.abs(i*xScale.step()+margin.left*1.5-mouseXais)/width) })
+              .attr("y", function(d,i) { return height - d*1.5 - margin.top-30*Math.pow(8,-Math.abs(i*xScale.step()+margin.left*1.5-mouseXais)/width); })
+              .attr('height',function(d,i) { return d*1.5+30*Math.pow(8,-Math.abs(i*xScale.step()+margin.left*1.5-mouseXais)/width); })
+      //  console.log(mouseXais);
+                      })
+            .on('mouseout',function(){
+
+               svg.selectAll('rect')
+                  .transition()     // adds animation
+                  .duration(800)
+                  .attr('x', function(d,i){
+         //          console.log(i)
+                   return i*xScale.step()+margin.left+margin.left/2; // margin + padding(which is margin/2)
+                 })
+                 .attr('width', xScale.step()-margin.left)
+                 .attr("y", function(d) { return height - d*1.5 - margin.top; }) // What if we don't again fix this Value ?
+                 .attr("height", function(d) { return d*1.5; });
+             });
+
+
+  /*     gs.append('gs')
+        .attr('transform','translate('+marginXris+',480)')
+         .on('mousemove',function(){
+           var mouse = d3.mouse(this);
+           console.log(mouse);
+        })*/
+// why must here???
+/*
+       svg.selectAll('text')
+          .data(dataResult)
+          .enter()
+          .append('text')
+          .text(d=>d)
+          .attr('text-anchor','middle')
+          .attr('x', function(d,i){
+            return i * xScale.step() + xScale.step()/2 + margin.left;
+          })
+          .attr('y',d => height-d*1.5-20 )//???
+          .attr('font-family','sans-serif')
+          .attr('font-size','15px')
+          .attr('fill','black');
+*/
+
+//       console.log(xScale.step())
+
+       var marginXris=margin.left-xScale.step();
+       if(dataName=='type'){
+       marginXris=margin.left-xScale.step()/2;}
+       var marginYris= height - d3.max(dataResult)*1.5 - margin.top - 50;
+
+       var g = svg.append("g")
+       g.append('g')
+          .attr('class','axis')
+          .attr('transform','translate('+marginXris+',480)')
+          .call(d3.axisBottom(xScale))
+          .attr('font-weight','bold')
+    //      .attr("y", height)
+      //    .attr("x", width)
+          .append('text')
+          .attr('transform','translate(760,-20)')
+          .text(valueName)
+          .attr('font-family','sans-serif')
+          .attr('font-size','15px')
+          .attr('fill','black');
+
+       g.append('g')
+          .attr('class','axis')
+          .attr('transform','translate('+ margin.left +','+marginYris+')')
+      //    .transition()
+        //  .duration(800)
+        //  .delay(500)
+          .call(d3.axisLeft(yScale))
+          .attr('font-weight','bold')
+          .append('text')
+            .attr('transform','translate(35,-10)')
+          .text('Numbers')
+          .attr('font-family','sans-serif')
+          .attr('font-size','15px')
+          .attr('fill','black');
+    //      .attr('fill','rgba(0,0,50,0)')
+    //      .transition()
+    //      .attr('fill','rgba(0,0,50,0.4)')
+    //      .duration(800)
+    //      .delay(500);
+    //      .delay(function (d, i) {
+    //          return i * 50;
+      //    })
+      function onMouseClick(){
+
+
+          svg.remove();
+          svg = d3.select('body')  //create a new SVG
+                  .append('svg')
+                  .on('click',onMouseClickBack)
+                  .attr('width',width)
+                  .attr('height',height)
+                  .append("g")
+                  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+          var pieData = dataResult.filter(x=> x>0);
+
+
+          var radius = height/3;
+          var pie = d3.pie()
+                      .sort(null)
+                      .value(d=>d);
+
+          var color = d3.scaleOrdinal()
+                        .range(["#C3CEDF", "#9FB0C9", "#7A90B1","#5B759C", "#405D88"]);
+
+          var arc = d3.arc()
+                      .outerRadius(radius-10)
+                      .innerRadius(5)
+                      .padAngle(3/360)
+                      .cornerRadius(12);
+
+          var labelArc = d3.arc()//provide the location to text
+                           .outerRadius(radius + 10)
+                           .innerRadius(radius + 10);
+
+
+          console.log(pie(pieData));
+
+          var g = svg.selectAll(".arc")
+              .data(pie(pieData))
+              .enter()
+              .append("g")
+              .attr("class", "arc")
+              .attr('fill','rgba(255,255,255,0)');
+
+          g.append("path")
+              .attr("d", arc)
+              .transition()
+              .duration(800)
+    //          .delay(function (d, i) {
+      //            return i * 50;
+        //      })
+              .style("fill", function(d) { return color(d.data); });
+          g.append("text")
+              .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+              .transition()
+              .duration(400)
+              .attr("transform", function(d) { return 'translate(' + labelArc.centroid(d) + ')'; })
+              .attr("text-anchor", "middle")
+      //        .text(function(d) { return d.data; })
+              .text(d=>d.data)
+              .attr('fill','rgba(0,0,50,0.5)');
+
+
+    /*
+          svg = d3.select('body')  //create a new SVG
+                  .append('svg')
+                //  .on('click',onMouseClick)
+                  .attr('width',width)
+                  .attr('height',height);
+      createBars(dataName,barNums,colorName);
+                //d3.select(this)*/
+      }
+      function onMouseClickBack(){
+            clearSVG();
+            createBars(dataName,barNums,valueName);
+      }
+
+
+      function onMouseOver(d, i) {
+    //      d3.select(this).attr('class', 'highlight'); // this, is the object that "owns" the JavaScript code
+           //selected bar (given by the 'this' object) d3.select(this) creates a 1-element selection containing the current node
+          d3.select(this)
+            .transition()     // adds animation
+            .duration(400)
+            .attr('x', function(d){
+        //      console.log(i)
+              return i*xScale.step()+margin.left+margin.left/2-8; // margin + padding(which is margin/2)
+            })
+        //    .attr('x', xScale.step()-margin.left + 20)
+            .attr('width', xScale.step()-margin.left + 16)
+            .attr("y", function(d) { return height - d*1.5 - margin.top - 30; })
+            .attr("height", function(d) { return d*1.5 + 30; });
+    //      console.log(i);
+          g.append("text")
+           .attr('class', 'val')
+           .attr('text-anchor','middle')
+           .attr('x', function(d){
+      //       console.log(i)
+             return (i+0.5)*xScale.step()
+          //   +10*Math.pow(8,-Math.abs(i*xScale.step()+margin.left*1.5-mouseXais)/width)
+             +margin.left;
+             // attribute of x + width/2: i*xScale.step()+margin.left+margin.left/2-8 + (xScale.step()-margin.left + 16)/2
+           })
+    /*       .attr('y', function() {
+               return height - d*1.5 - margin.top;
+           })
+           .transition()
+           .attr('y', function() {
+               return height - d*1.5 - margin.top -35;
+           })
+           .duration(400)*/
+           .text(function() {
+               return [+d];  // Value of the text
+           })
+           .attr('font-family','sans-serif')
+           .attr('font-size','15px')
+           .attr('font-weight','bold')
+      //     .attr('fill','black')
+           .attr('fill','rgba(0,0,0,0)')
+           .attr('y', function() {
+               return height - d*1.5 - margin.top;
+           })
+           .transition()
+           .attr('y', function() {
+               return height - d*1.5 - margin.top -35;
+           })
+
+           .attr('fill',(d,i)=>'rgba(0,0,'+ (i*10+60) +',0.5)')
+           .duration(400)
+        ;
+      }
+
+      //mouseout event handler function
+      function onMouseOut(d, i) {
+          // use the text label class to remove label on mouseout
+          d3.select(this)
+            .attr('class', 'bar')
+            .transition()     // adds animation
+            .duration(400)
+            .attr('x', function(d){
+    //          console.log(i)
+              return i*xScale.step()+margin.left+margin.left/2; // margin + padding(which is margin/2)
+            })
+            .attr('width', xScale.step()-margin.left)
+            .attr("y", function(d) { return height - d*1.5 - margin.top; }) // What if we don't again fix this Value ?
+            .attr("height", function(d) { return d*1.5; }); // Play with changing the Value
+
+          d3.selectAll('.val')
+            .remove();
+      }
+
+
+}
+
+
+
+function clearSVG(){
+      d3.selectAll('svg')
+        .remove();
+      svg = d3.select('body')  //create a new SVG
+              .append('svg')
+            //  .on('click',onMouseClick)
+              .attr('width',width)
+              .attr('height',height);
+}
+
+
+/*
+    var dataset = [5,10,15,20,25];
+    var w = 500;
+    var h = 500;
+    var barPadding = 4;
+//data = (await
+//d3.csv('Pokemon.csv',({HP,Total}) => ({hp: HP, totalValue: +Total}))).sort((a,b) => b.totalValue - a.totalValue)
+
+//console.log(data)
+    var svg = d3.select("body") //create a SVG
+                .append("svg")
+                .attr("width",w)
+                .attr("height",h)
+
+    svg.selectAll("rect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+        .attr('x',function(d,i){
+          return i * (w / dataset.length);
+        })
+        .attr('y',function(d){
+          return h - (d*4);
+        })
+        .attr('width', w/dataset.length - barPadding)
+        .attr('height',function(d){
+          return d*4;
+        })
+        .attr('fill','rgb(0,0,50)');
+*/
+
+
+//console.log('hp:'+hp)
+/*
+d3.select("body")
+    .append("p")
+    .text("a new paragraph");
+
+    var w = 500;
+    var h = 500;
+    var barPadding = 4;
+
+
+        var resultHP=new Array();
+        //console.log(type);
+        function myfunction(){
+
+
+        resultHP[0] = hp.filter(hp => hp<=50).length;
+        resultHP[1] = hp.filter(hp => hp<=70&&hp>50).length;
+        resultHP[2] = hp.filter(hp => hp<=90&&hp>70).length;
+        resultHP[3] = hp.filter(hp => hp>=90).length;
+        console.log(resultHP)
+
+        var svg = d3.select("body") //create a SVG
+                    .append("svg")
+                    .attr("width",w)
+                    .attr("height",h)
+
+
+        svg.selectAll("rect")
+            .data(resultHP)
+            .enter()
+            .append("rect")
+            .attr('x',function(d,i){
+              return i * (w / resultHP.length) + 30;
+            })
+            .attr('y',function(d){
+              return h - (d) - 30 ;
+            })
+            .attr('width', (w-50)/resultHP.length - barPadding)
+            .attr('height', d=>d)//function(d){
+            //  return d;
+            //})
+            .attr('fill','rgba(0,0,50,0.5)');
+        svg.selectAll('text')
+           .data(resultHP)
+           .enter()
+           .append('text')
+           .text(d=>d)
+           .attr('text-anchor','middle')
+           .attr('x', function(d,i){
+             return i * (w / resultHP.length) + (w/resultHP.length - barPadding)/2+25;})
+           .attr('y',d=> h-d+16)//???
+           .attr('font-family','sans-serif')
+           .attr('font-size','20px')
+           .attr('fill','white');
+
+         var xScale = d3.scaleLinear()
+                        .domain([30,d3.max(hp)])
+                        .range([0, w])
+
+         var yScale = d3.scaleLinear()
+                        .domain([0,d3.max(resultHP)])
+                        .range([h, 0]);
+
+         var xAxis = d3.axisBottom()
+                       .scale(xScale);
+
+         var yAxis = d3.axisLeft()
+                       .scale(yScale);
+
+         svg.append('g')
+            .attr('class','axis')
+            .attr('transform','translate(20,480)')
+            .call(xAxis)
+            .append('text')
+            .attr('transform','translate(250,20)')
+            .text('HP value')
+            .attr('font-family','sans-serif')
+            .attr('font-size','20px')
+            .attr('fill','black');
+
+         svg.append('g')
+            .attr('class','axis')
+            .attr('transform','translate(30,130)')
+            .call(yAxis)
+            .append('text')
+            .attr('transform','translate(50,-10)')
+            .text('Number of values')
+            .attr('font-family','sans-serif')
+            .attr('font-size','10px')
+            .attr('fill','black');
+}
+*/
+
+window.onload=function (){
+    createBars(totalValue,10,'Total Value');
+}
+
+
+
+
+</script>
+
+</body>
+</html>
